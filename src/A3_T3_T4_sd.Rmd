@@ -1,0 +1,100 @@
+---
+title: "Assignment 3, Tasks 3 & 4, ESM-206"
+author: "Sean Denny"
+date: "11/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Functions used:
+
+here()
+clean_names()
+geom_histogram()
+geom_boxplot()
+
+
+## Assignment:
+
+Load packages and data, and convert column names to lower snake case:
+
+```{r Load packages and data, message = FALSE}
+
+library(here)
+library(janitor)
+library(kableExtra)
+library(lubridate)
+library(RColorBrewer)
+library(tidyverse)
+
+# Is this a problem, because some of the functions might conflict with each other? Are conflicting functions common across packages?
+
+urchins <- read_csv(here("data","urchins.csv")) %>%
+  # convert the names to lower snake case
+  clean_names()
+```
+
+### Task 3
+
+#### Section 1
+
+Explore the data:
+
+```{r}
+
+# Exploratory histogram of size by urchin species (red vs. purple), faceted by common name:
+
+urchins_histo <- ggplot(data = urchins, aes(x = size)) +
+  geom_histogram(bins = 25) +
+  facet_wrap(~common_name) +
+  theme_minimal() +
+  labs(x = "urchin diameter (cm)")
+
+urchins_histo
+
+# Exploratory box plot with common name on x-axis and size on y-axis:
+
+urchins_box <- ggplot(data = urchins, aes(x = common_name, y = size)) +
+  geom_boxplot() +
+  labs(x = " ", y = "urchin diameter (cm)") +
+  theme_minimal()
+
+urchins_box
+
+```
+
+Descriptive statistics table:
+
+```{r}
+
+urchin_table <- urchins %>% 
+  group_by(common_name) %>% 
+  summarize(mean_size = mean(size), median_size = median(size), standard_deviation = sd(size), sample_size = n()) %>% 
+  kable(col.names = c("species", "mean size (cm)", "median size (cm)", "standard deviation (cm)", "sample size")) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+
+# bootstrap_options = "striped" gives it the alternativing gray and white backdrop across rows. Could just leave it out to keep things simpler. In this case, this option is probably unnecssary.
+
+urchin_table
+
+```
+
+#### Section 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
