@@ -1,0 +1,125 @@
+---
+title: "A3_T4_SD_2020"
+author: "Sean Denny"
+date: "11/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Functions used:
+
+here()
+clean_names()
+geom_histogram()
+geom_boxplot()
+geom_col()
+filter()
+mutate()
+separate()
+case_when()
+
+## Assignment:
+
+Load packages and data, and convert column names to lower snake case:
+
+```{r Load packages and data, message = FALSE}
+
+library(here)
+library(janitor)
+library(kableExtra)
+library(lubridate)
+library(RColorBrewer)
+library(tidyverse)
+
+# Is this a problem, because some of the functions might conflict with each other? Are conflicting functions common across packages?
+
+urchins <- read_csv(here("data","urchins.csv")) %>%
+  # convert the names to lower snake case
+  clean_names()
+```
+
+Compare mean size of purple urchins in control and annual sections of Naple Reef in Janary 2010 using a two-sample t-test.
+
+Create a dataset that only has info for Naples Reef for 2010.
+
+```{r}
+
+naples_2010 <- urchins %>% 
+  filter(common_name == "Purple Urchin") %>% 
+  mutate(date = mdy(date)) %>% 
+  separate(col = date,
+           into = c("year", "month", "day"),
+           sep = "-",
+           remove = FALSE) %>%
+mutate(site_full = case_when(
+  site == "NAPL" ~ "Naples Reef",
+  site == "AQUE" ~ "Arroyo Quemado Reef",
+  site == "IVEE" ~ "Isla Vista Reef",
+  site == "CARP" ~ "Carpinteria Reef",
+  site == "MOHK" ~ "Mohawk Reef",
+)) %>% 
+  filter(site_full == "Naples Reef" & year == "2010") %>% 
+  select(size, treatment)
+```
+
+Explore the data using histograms and q-q plots, per treatment:
+
+Histograms:
+
+```{r}
+naples_histogram <-ggplot(data = naples_2010, aes(x = size)) +
+  geom_histogram(fill = "purple", color = "black", bins = 10) +
+  facet_wrap(~treatment)
+
+naples_histogram
+```
+
+Q-q plots:
+
+```{r}
+naples_qq <- ggplot(data = naples_2010, aes(sample = size))+
+  geom_qq() +
+  facet_wrap(~ treatment)
+
+naples_qq
+```
+
+Create a summary table of descriptive statistics for annual and control groups.
+
+```{r}
+
+naples_table <- naples_2010 %>% 
+  group_by(treatment) %>% 
+  summarize(mean_size = mean(size), standard_dev = sd(size), sample_size = n()) %>% 
+  mutate(treatment = case_when(
+    treatment == "ANNUAL" ~ "annual",
+    treatment == "CONTROL" ~ "control"
+  )) %>% 
+  kable(col.names = c("treatment type", "mean size (cm)", "standard deviation (cm)", "sample size")) %>% 
+    kable_styling(bootstrap_options = "striped", full_width = FALSE) # Could just erase bootstrap_option = "striped" to remove the gray alternating stripe.
+
+naples_table
+
+```
+
+Perform a two-sample t-text to compare means between the two groups
+
+```{r}
+
+# First create subsets of data for each group:
+
+naples_control <- naples_2010 %>% 
+  filter(treatment == "CONTROL") %>% 
+  select(size)
+
+naples_annual <- naples_2010 %>% 
+  filter(treatment == "ANNUAL") %>% 
+  select(size)
+
+t.test(x = naples_control, y = naples_annual)
+
+
+```
