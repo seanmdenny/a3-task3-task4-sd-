@@ -16,9 +16,12 @@ clean_names()
 geom_histogram()
 geom_boxplot()
 geom_col()
+filter()
+mutate()
 separate()
 case_when()
 count() (combines `group_by()` and summarize n() all in one function).
+kable()
 
 
 ## Assignment:
@@ -136,6 +139,8 @@ urchins_graph <- ggplot(data = purple_urchins_site_year, aes(x = year, y = sampl
 urchins_graph
 
 ```
+
+### Task 4
 
 
 
