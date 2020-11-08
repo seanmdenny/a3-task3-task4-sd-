@@ -15,6 +15,10 @@ here()
 clean_names()
 geom_histogram()
 geom_boxplot()
+geom_col()
+separate()
+case_when()
+count() (combines `group_by()` and summarize n() all in one function).
 
 
 ## Assignment:
@@ -84,6 +88,54 @@ urchin_table
 
 #### Section 2
 
+Explore purple urchin counts by site and year:
+
+```{r}
+
+purple_urchins <- urchins %>% 
+  filter(common_name == "Purple Urchin") %>% 
+  mutate(date = mdy(date)) %>% 
+  separate(col = date,
+           into = c("year", "month", "day"),
+           sep = "-",
+           remove = FALSE) %>%
+mutate(site_full = case_when(
+  site == "NAPL" ~ "Naples Reef",
+  site == "AQUE" ~ "Arroyo Quemado Reef",
+  site == "IVEE" ~ "Isla Vista Reef",
+  site == "CARP" ~ "Carpinteria Reef",
+  site == "MOHK" ~ "Mohawk Reef",
+))
+```
+
+Make a summary table showing urchin count by site and year
+
+```{r}
+# So I think I want to have three columns, site, year, count, with a set of rows for each site covering all the years.
+
+# counts by site and year
+
+purple_urchins_site_year <- purple_urchins %>% 
+  count(site_full, year) %>% 
+  rename("sample_size" = n)
+  
+```
+
+Make an exploratory graph of counts of purple urchins recorded at chea site over time for years in the study.
+
+```{r}
+
+urchins_graph <- ggplot(data = purple_urchins_site_year, aes(x = year, y = sample_size)) +
+  geom_col() +
+  facet_wrap(~site_full) +
+  theme_minimal() +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(y = "count", x = "", title = "Purple urchin counts by year and site") +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+urchins_graph
+
+```
 
 
 
